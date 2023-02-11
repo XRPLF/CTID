@@ -43,6 +43,9 @@ def decodeCTIM(ctim):
         'network_id': network_id
     }
 
+// NOTE TO DEVELOPER:
+// you only need the two functions above, below are test cases, if you want them.
+
 import unittest
 
 class TestEncodeAndDecodeCTIM(unittest.TestCase):
