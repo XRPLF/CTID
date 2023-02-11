@@ -1,13 +1,13 @@
 const encodeCTIM = (ledger_seq: number, txn_index: number, network_id: number): string =>
 {
-  if (ledger_seq > 0xFFFFFFF)
-    throw new Error("ledger_seq must not be greater than 268435455.");
+  if (ledger_seq > 0xFFFFFFF || ledger_seq < 0)
+    throw new Error("ledger_seq must not be greater than 268435455 or less than 0.");
 
-  if (txn_index > 0xFFFF)
-    throw new Error("txn_index must not be greater than 65535.");
+  if (txn_index > 0xFFFF || txn_index < 0)
+    throw new Error("txn_index must not be greater than 65535 or less than 0.");
 
-  if (network_id > 0xFFFF)
-    throw new Error("network_id must not be greater than 65535.");
+  if (network_id > 0xFFFF || network_id < 0)
+    throw new Error("network_id must not be greater than 65535 or less than 0.");
 
   return (((BigInt(0xC0000000) +
     BigInt(ledger_seq)) << 32n) +
@@ -54,13 +54,16 @@ const tests = () : void =>
   assert.equal(encodeCTIM(13249191, 12911, 49221), "C0CA2AA7326FC045");
 
   // Test case 2: ledger_seq greater than 0xFFFFFFF
-  assert.throws(() => encodeCTIM(0x10000000, 0xFFFF, 0xFFFF), /ledger_seq must not be greater than 268435455./);
+  assert.throws(() => encodeCTIM(0x10000000, 0xFFFF, 0xFFFF), /ledger_seq must not be greater than 268435455 or less than 0./);
+  assert.throws(() => encodeCTIM(-1, 0xFFFF, 0xFFFF), /ledger_seq must not be greater than 268435455 or less than 0./);
 
   // Test case 3: txn_index greater than 0xFFFF
-  assert.throws(() => encodeCTIM(0xFFFFFFF, 0x10000, 0xFFFF), /txn_index must not be greater than 65535./);
+  assert.throws(() => encodeCTIM(0xFFFFFFF, 0x10000, 0xFFFF), /txn_index must not be greater than 65535 or less than 0./);
+  assert.throws(() => encodeCTIM(0xFFFFFFF, -1, 0xFFFF), /txn_index must not be greater than 65535 or less than 0./);
 
   // Test case 4: network_id greater than 0xFFFF
-  assert.throws(() => encodeCTIM(0xFFFFFFF, 0xFFFF, 0x10000), /network_id must not be greater than 65535./);
+  assert.throws(() => encodeCTIM(0xFFFFFFF, 0xFFFF, 0x10000), /network_id must not be greater than 65535 or less than 0./);
+  assert.throws(() => encodeCTIM(0xFFFFFFF, 0xFFFF, -1), /network_id must not be greater than 65535 or less than 0./);
 
   // Test cases For decodeCTIM
 
