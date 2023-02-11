@@ -65,7 +65,7 @@ decodeCTIM(const T ctim) noexcept
 }
 
 // NOTE TO DEVELOPER:
-// you only need the two functions above, below are test cases for nodejs, if
+// you only need the two functions above, below are test cases, if
 // you want them.
 
 int main() {
