@@ -16,6 +16,17 @@ Char Offset | Field | Size (bits) |Explanation
 8-11 | YYYY | 16 | Transaction index (offset) within that ledger
 12-16 | ZZZZ | 16 | Network ID.
 
+Reference implementations are available for several languages. Click below to dive in.
+
+Language | Implementation
+-|-
+Javascript | [ctim.js](https://github.com/XRPLF/ctim/blob/main/ctim.js)
+Typescript | [ctim.ts](https://github.com/XRPLF/ctim/blob/main/ctim.ts)
+C++ | [ctim.cpp](https://github.com/XRPLF/ctim/blob/main/ctim.cpp)
+Python 3| [ctim.py](https://github.com/XRPLF/ctim/blob/main/ctim.py)
+PHP 5|[ctim.php](https://github.com/XRPLF/ctim/blob/main/ctim.php)
+
+
 ### Function prototypes (pseudocode)
 In this repo there are several reference implementations available for various languages but they all use the same function model.
 ```js
