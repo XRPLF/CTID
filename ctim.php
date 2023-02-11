@@ -56,7 +56,7 @@ function decodeCTIM($ctim)
 }
 
 // NOTE TO DEVELOPER:
-// you only need the two functions above, below are test cases for nodejs, if you want them.
+// you only need the two functions above, below are test cases, if you want them.
 
 print("Running tests...\n");
 
