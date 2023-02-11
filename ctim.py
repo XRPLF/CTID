@@ -1,18 +1,18 @@
 def encodeCTIM(ledger_seq, txn_index, network_id):
     if not isinstance(ledger_seq, int):
         raise ValueError("ledger_seq must be a number.")
-    if ledger_seq > 0xFFFFFFF:
-        raise ValueError("ledger_seq must not be greater than 268435455.")
+    if ledger_seq > 0xFFFFFFF or ledger_seq < 0:
+        raise ValueError("ledger_seq must not be greater than 268435455 or less than 0.")
 
     if not isinstance(txn_index, int):
         raise ValueError("txn_index must be a number.")
-    if txn_index > 0xFFFF:
-        raise ValueError("txn_index must not be greater than 65535.")
+    if txn_index > 0xFFFF or txn_index < 0:
+        raise ValueError("txn_index must not be greater than 65535 or less than 0.")
 
     if not isinstance(network_id, int):
         raise ValueError("network_id must be a number.")
-    if network_id > 0xFFFF:
-        raise ValueError("network_id must not be greater than 65535.")
+    if network_id > 0xFFFF or network_id < 0:
+        raise ValueError("network_id must not be greater than 65535 or less than 0.")
 
     ctim_value = ((0xC0000000 + ledger_seq) << 32) + (txn_index << 16) + network_id
     return format(ctim_value, 'x').upper()
@@ -43,9 +43,6 @@ def decodeCTIM(ctim):
         'network_id': network_id
     }
 
-# NOTE TO DEVELOPER:
-# you only need the two functions above, below are test cases for nodejs, if you want them.
-
 import unittest
 
 class TestEncodeAndDecodeCTIM(unittest.TestCase):
@@ -56,17 +53,19 @@ class TestEncodeAndDecodeCTIM(unittest.TestCase):
         self.assertEqual(encodeCTIM(1, 2, 3), "C000000100020003")
         self.assertEqual(encodeCTIM(13249191, 12911, 49221), "C0CA2AA7326FC045")
 
-        # Test case 2: ledger_seq greater than 0xFFFFFFF
-        with self.assertRaises(ValueError, msg="ledger_seq must not be greater than 268435455."):
+        # Test case 2: ledger_seq greater than 0xFFFFFFF or less than 0
+        with self.assertRaises(ValueError, msg="ledger_seq must not be greater than 268435455 or less than 0."):
             encodeCTIM(0x10000000, 0xFFFF, 0xFFFF)
+            encodeCTIM(-1, 0xFFFF, 0xFFFF)
 
-        # Test case 3: txn_index greater than 0xFFFF
-        with self.assertRaises(ValueError, msg="txn_index must not be greater than 65535."):
+        # Test case 3: txn_index greater than 0xFFFF or less than 0
+        with self.assertRaises(ValueError, msg="txn_index must not be greater than 65535 or less than 0."):
             encodeCTIM(0xFFFFFFF, 0x10000, 0xFFFF)
+            encodeCTIM(0xFFFFFFF, -1, 0xFFFF)
 
-        # Test case 4: network_id greater than 0xFFFF
-        with self.assertRaises(ValueError, msg="network_id must not be greater than 65535."):
-            encodeCTIM(0xFFFFFFF, 0xFFFF, 0x10000)
+        # Test case 4: network_id greater than 0xFFFF or less than 0
+        with self.assertRaises(ValueError, msg="network_id must not be greater than 65535 or less than 0."):
+            encodeCTIM(0xFFFFFFF, 0xFFFF, -1)
 
         # Test case 5: Valid input values
         self.assertDictEqual(decodeCTIM("CFFFFFFFFFFFFFFF"), {'ledger_seq': 0xFFFFFFF, 'txn_index': 0xFFFF, 'network_id': 0xFFFF})
