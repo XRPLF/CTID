@@ -1,3 +1,6 @@
 node_modules
 package.json
 *.lock
+
+# Apple drive tools
+._*
