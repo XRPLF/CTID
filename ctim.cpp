@@ -10,20 +10,20 @@
 #include <type_traits>
 
 std::optional<std::string>
-encodeCTIM(uint32_t ledger_seq, uint16_t txn_index, uint16_t network_id) noexcept
+encodeCTIM(uint32_t lgrIndex, uint16_t txnIndex, uint16_t networkId) noexcept
 {
-  if (ledger_seq > 0xFFFFFFF)
+  if (lgrIndex > 0xFFFFFFF)
     return {};
 
-  if (txn_index > 0xFFFF)
+  if (txnIndex > 0xFFFF)
     return {};
 
-  if (network_id > 0xFFFF)
+  if (networkId > 0xFFFF)
     return {};
 
   uint64_t ctimValue =
-      ((0xC0000000ULL + static_cast<uint64_t>(ledger_seq)) << 32) +
-      (static_cast<uint64_t>(txn_index) << 16) + network_id;
+      ((0xC0000000ULL + static_cast<uint64_t>(lgrIndex)) << 32) +
+      (static_cast<uint64_t>(txnIndex) << 16) + networkId;
 
   std::stringstream buffer;
   buffer << std::hex << std::uppercase << std::setfill('0') << std::setw(16)
@@ -58,10 +58,10 @@ decodeCTIM(const T ctim) noexcept
       (ctimValue & 0xF000000000000000ULL) != 0xC000000000000000ULL)
     return {};
 
-  uint32_t ledger_seq = (ctimValue >> 32) & 0xFFFFFFFUL;
-  uint16_t txn_index = (ctimValue >> 16) & 0xFFFFU;
-  uint16_t network_id = ctimValue & 0xFFFFU;
-  return {{ledger_seq, txn_index, network_id}};
+  uint32_t lgrIndex = (ctimValue >> 32) & 0xFFFFFFFUL;
+  uint16_t txnIndex = (ctimValue >> 16) & 0xFFFFU;
+  uint16_t networkId = ctimValue & 0xFFFFU;
+  return {{lgrIndex, txnIndex, networkId}};
 }
 
 // NOTE TO DEVELOPER:
@@ -79,14 +79,14 @@ int main() {
   assert(encodeCTIM(13249191UL, 12911U, 49221U) ==
          std::optional<std::string>("C0CA2AA7326FC045"));
 
-  // Test case 2: ledger_seq greater than 0xFFFFFFF
+  // Test case 2: lgrIndex greater than 0xFFFFFFF
   assert(!encodeCTIM(0x10000000UL, 0xFFFFU, 0xFFFFU));
 
-  // Test case 3: txn_index greater than 0xFFFF
+  // Test case 3: txnIndex greater than 0xFFFF
   // this test case is impossible in c++ due to the type, left in for
   // completeness assert(!encodeCTIM(0xFFFFFFF, 0x10000, 0xFFFF));
 
-  // Test case 4: network_id greater than 0xFFFF
+  // Test case 4: networkId greater than 0xFFFF
   // this test case is impossible in c++ due to the type, left in for
   // completeness assert(!encodeCTIM(0xFFFFFFFUL, 0xFFFFU, 0x10000U));
 

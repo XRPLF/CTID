@@ -1,25 +1,25 @@
 <?php
 
-function encodeCTIM($ledger_seq, $txn_index, $network_id)
+function encodeCTIM($lgrIndex, $txnIndex, $networkId)
 {
-  if (!is_numeric($ledger_seq))
-    throw new Exception("ledger_seq must be a number.");
-  if ($ledger_seq > 0xFFFFFFF || $ledger_seq < 0)
-    throw new Exception("ledger_seq must not be greater than 268435455 or less than 0.");
+  if (!is_numeric($lgrIndex))
+    throw new Exception("lgrIndex must be a number.");
+  if ($lgrIndex > 0xFFFFFFF || $lgrIndex < 0)
+    throw new Exception("lgrIndex must not be greater than 268435455 or less than 0.");
 
-  if (!is_numeric($txn_index))
-    throw new Exception("txn_index must be a number.");
-  if ($txn_index > 0xFFFF || $txn_index < 0)
-    throw new Exception("txn_index must not be greater than 65535 or less than 0.");
+  if (!is_numeric($txnIndex))
+    throw new Exception("txnIndex must be a number.");
+  if ($txnIndex > 0xFFFF || $txnIndex < 0)
+    throw new Exception("txnIndex must not be greater than 65535 or less than 0.");
 
-  if (!is_numeric($network_id))
-    throw new Exception("network_id must be a number.");
-  if ($network_id > 0xFFFF || $network_id < 0)
-    throw new Exception("network_id must not be greater than 65535 or less than 0.");
+  if (!is_numeric($networkId))
+    throw new Exception("networkId must be a number.");
+  if ($networkId > 0xFFFF || $networkId < 0)
+    throw new Exception("networkId must not be greater than 65535 or less than 0.");
 
-  $ledger_part = dechex($ledger_seq);
-  $txn_part = dechex($txn_index);
-  $network_part = dechex($network_id);
+  $ledger_part = dechex($lgrIndex);
+  $txn_part = dechex($txnIndex);
+  $network_part = dechex($networkId);
 
   if (strlen($ledger_part) < 7)
       $ledger_part = str_repeat("0", 7 - strlen($ledger_part)) . $ledger_part;
@@ -45,13 +45,13 @@ function decodeCTIM($ctim)
   if (substr($ctim, 0, 1) !== 'C')
     throw new Exception("ctim must be exactly 16 nibbles and start with a C");
 
-  $ledger_seq = substr($ctim, 1, 7);
-  $txn_index = substr($ctim, 8, 4);
-  $network_id = substr($ctim, 12, 4);
+  $lgrIndex = substr($ctim, 1, 7);
+  $txnIndex = substr($ctim, 8, 4);
+  $networkId = substr($ctim, 12, 4);
   return array(
-    "ledger_seq" => hexdec($ledger_seq),
-    "txn_index" => hexdec($txn_index),
-    "network_id" => hexdec($network_id)
+    "lgrIndex" => hexdec($lgrIndex),
+    "txnIndex" => hexdec($txnIndex),
+    "networkId" => hexdec($networkId)
   );
 }
 
@@ -74,53 +74,53 @@ assert_test(encodeCTIM(0, 0, 0) == "C000000000000000");
 assert_test(encodeCTIM(1, 2, 3) == "C000000100020003");
 assert_test(encodeCTIM(13249191, 12911, 49221) == "C0CA2AA7326FC045");
 
-// Test case 2: ledger_seq greater than 0xFFFFFFF
+// Test case 2: lgrIndex greater than 0xFFFFFFF
 try {
   encodeCTIM(0x10000000, 0xFFFF, 0xFFFF);
   assert_test(false);
 } catch (Exception $e) {
-  assert_test(strcmp($e->getMessage(), "ledger_seq must not be greater than 268435455 or less than 0.") == 0);
+  assert_test(strcmp($e->getMessage(), "lgrIndex must not be greater than 268435455 or less than 0.") == 0);
 }
 try {
   encodeCTIM(-1, 0xFFFF, 0xFFFF);
   assert_test(false);
 } catch (Exception $e) {
-  assert_test(strcmp($e->getMessage(), "ledger_seq must not be greater than 268435455 or less than 0.") == 0);
+  assert_test(strcmp($e->getMessage(), "lgrIndex must not be greater than 268435455 or less than 0.") == 0);
 }
 
-// Test case 3: txn_index greater than 0xFFFF
+// Test case 3: txnIndex greater than 0xFFFF
 try {
   encodeCTIM(0xFFFFFFF, 0x10000, 0xFFFF);
   assert_test(false);
 } catch (Exception $e) {
-  assert_test(strcmp($e->getMessage(), "txn_index must not be greater than 65535 or less than 0.") == 0);
+  assert_test(strcmp($e->getMessage(), "txnIndex must not be greater than 65535 or less than 0.") == 0);
 }
 try {
   encodeCTIM(0xFFFFFFF, -1, 0xFFFF);
   assert_test(false);
 } catch (Exception $e) {
-  assert_test(strcmp($e->getMessage(), "txn_index must not be greater than 65535 or less than 0.") == 0);
+  assert_test(strcmp($e->getMessage(), "txnIndex must not be greater than 65535 or less than 0.") == 0);
 }
 
-// Test case 4: network_id greater than 0xFFFF
+// Test case 4: networkId greater than 0xFFFF
 try {
   encodeCTIM(0xFFFFFFF, 0xFFFF, 0x10000);
   assert_test(false);
 } catch (Exception $e) {
-  assert_test(strcmp($e->getMessage(), "network_id must not be greater than 65535 or less than 0.") == 0);
+  assert_test(strcmp($e->getMessage(), "networkId must not be greater than 65535 or less than 0.") == 0);
 }
 try {
   encodeCTIM(0xFFFFFFF, 0xFFFF, -1);
   assert_test(false);
 } catch (Exception $e) {
-  assert_test(strcmp($e->getMessage(), "network_id must not be greater than 65535 or less than 0.") == 0);
+  assert_test(strcmp($e->getMessage(), "networkId must not be greater than 65535 or less than 0.") == 0);
 }
 
 // Test case 5: Valid input values
-assert_test(decodeCTIM("CFFFFFFFFFFFFFFF") == array("ledger_seq" => 0xFFFFFFF, "txn_index" => 0xFFFF, "network_id" => 0xFFFF));
-assert_test(decodeCTIM("C000000000000000") == array("ledger_seq" => 0, "txn_index" => 0, "network_id" => 0));
-assert_test(decodeCTIM("C000000100020003") == array("ledger_seq" =>1, "txn_index" => 2, "network_id" => 3));
-assert_test(decodeCTIM("C0CA2AA7326FC045") == array("ledger_seq" =>13249191, "txn_index" => 12911, "network_id" => 49221));
+assert_test(decodeCTIM("CFFFFFFFFFFFFFFF") == array("lgrIndex" => 0xFFFFFFF, "txnIndex" => 0xFFFF, "networkId" => 0xFFFF));
+assert_test(decodeCTIM("C000000000000000") == array("lgrIndex" => 0, "txnIndex" => 0, "networkId" => 0));
+assert_test(decodeCTIM("C000000100020003") == array("lgrIndex" =>1, "txnIndex" => 2, "networkId" => 3));
+assert_test(decodeCTIM("C0CA2AA7326FC045") == array("lgrIndex" =>13249191, "txnIndex" => 12911, "networkId" => 49221));
 
 
 print("Done!\n");
