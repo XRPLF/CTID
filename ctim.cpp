@@ -15,12 +15,6 @@ encodeCTIM(uint32_t ledger_seq, uint16_t txn_index, uint16_t network_id) noexcep
   if (ledger_seq > 0xFFFFFFF)
     return {};
 
-  if (txn_index > 0xFFFF)
-    return {};
-
-  if (network_id > 0xFFFF)
-    return {};
-
   uint64_t ctimValue =
       ((0xC0000000ULL + static_cast<uint64_t>(ledger_seq)) << 32) +
       (static_cast<uint64_t>(txn_index) << 16) + network_id;
