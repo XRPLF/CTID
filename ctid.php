@@ -1,6 +1,6 @@
 <?php
 
-function encodeCTIM($ledger_seq, $txn_index, $network_id)
+function encodeCTID($ledger_seq, $txn_index, $network_id)
 {
   if (!is_numeric($ledger_seq))
     throw new Exception("ledger_seq must be a number.");
@@ -31,23 +31,23 @@ function encodeCTIM($ledger_seq, $txn_index, $network_id)
   return strtoupper("C" . $ledger_part . $txn_part . $network_part);
 }
 
-function decodeCTIM($ctim)
+function decodeCTID($ctid)
 {
-  if (is_string($ctim))
+  if (is_string($ctid))
   {
-    if (!ctype_xdigit($ctim))
-      throw new Exception("ctim must be a hexadecimal string");
-    if (strlen($ctim) !== 16)
-      throw new Exception("ctim must be exactly 16 nibbles and start with a C");
+    if (!ctype_xdigit($ctid))
+      throw new Exception("ctid must be a hexadecimal string");
+    if (strlen($ctid) !== 16)
+      throw new Exception("ctid must be exactly 16 nibbles and start with a C");
   } else
-    throw new Exception("ctim must be a hexadecimal string");
+    throw new Exception("ctid must be a hexadecimal string");
 
-  if (substr($ctim, 0, 1) !== 'C')
-    throw new Exception("ctim must be exactly 16 nibbles and start with a C");
+  if (substr($ctid, 0, 1) !== 'C')
+    throw new Exception("ctid must be exactly 16 nibbles and start with a C");
 
-  $ledger_seq = substr($ctim, 1, 7);
-  $txn_index = substr($ctim, 8, 4);
-  $network_id = substr($ctim, 12, 4);
+  $ledger_seq = substr($ctid, 1, 7);
+  $txn_index = substr($ctid, 8, 4);
+  $network_id = substr($ctid, 12, 4);
   return array(
     "ledger_seq" => hexdec($ledger_seq),
     "txn_index" => hexdec($txn_index),
@@ -69,20 +69,20 @@ function assert_test($x)
 }
 
 // Test case 1: Valid input values
-assert_test(encodeCTIM(0xFFFFFFF, 0xFFFF, 0xFFFF) == "CFFFFFFFFFFFFFFF");
-assert_test(encodeCTIM(0, 0, 0) == "C000000000000000");
-assert_test(encodeCTIM(1, 2, 3) == "C000000100020003");
-assert_test(encodeCTIM(13249191, 12911, 49221) == "C0CA2AA7326FC045");
+assert_test(encodeCTID(0xFFFFFFF, 0xFFFF, 0xFFFF) == "CFFFFFFFFFFFFFFF");
+assert_test(encodeCTID(0, 0, 0) == "C000000000000000");
+assert_test(encodeCTID(1, 2, 3) == "C000000100020003");
+assert_test(encodeCTID(13249191, 12911, 49221) == "C0CA2AA7326FC045");
 
 // Test case 2: ledger_seq greater than 0xFFFFFFF
 try {
-  encodeCTIM(0x10000000, 0xFFFF, 0xFFFF);
+  encodeCTID(0x10000000, 0xFFFF, 0xFFFF);
   assert_test(false);
 } catch (Exception $e) {
   assert_test(strcmp($e->getMessage(), "ledger_seq must not be greater than 268435455 or less than 0.") == 0);
 }
 try {
-  encodeCTIM(-1, 0xFFFF, 0xFFFF);
+  encodeCTID(-1, 0xFFFF, 0xFFFF);
   assert_test(false);
 } catch (Exception $e) {
   assert_test(strcmp($e->getMessage(), "ledger_seq must not be greater than 268435455 or less than 0.") == 0);
@@ -90,13 +90,13 @@ try {
 
 // Test case 3: txn_index greater than 0xFFFF
 try {
-  encodeCTIM(0xFFFFFFF, 0x10000, 0xFFFF);
+  encodeCTID(0xFFFFFFF, 0x10000, 0xFFFF);
   assert_test(false);
 } catch (Exception $e) {
   assert_test(strcmp($e->getMessage(), "txn_index must not be greater than 65535 or less than 0.") == 0);
 }
 try {
-  encodeCTIM(0xFFFFFFF, -1, 0xFFFF);
+  encodeCTID(0xFFFFFFF, -1, 0xFFFF);
   assert_test(false);
 } catch (Exception $e) {
   assert_test(strcmp($e->getMessage(), "txn_index must not be greater than 65535 or less than 0.") == 0);
@@ -104,23 +104,23 @@ try {
 
 // Test case 4: network_id greater than 0xFFFF
 try {
-  encodeCTIM(0xFFFFFFF, 0xFFFF, 0x10000);
+  encodeCTID(0xFFFFFFF, 0xFFFF, 0x10000);
   assert_test(false);
 } catch (Exception $e) {
   assert_test(strcmp($e->getMessage(), "network_id must not be greater than 65535 or less than 0.") == 0);
 }
 try {
-  encodeCTIM(0xFFFFFFF, 0xFFFF, -1);
+  encodeCTID(0xFFFFFFF, 0xFFFF, -1);
   assert_test(false);
 } catch (Exception $e) {
   assert_test(strcmp($e->getMessage(), "network_id must not be greater than 65535 or less than 0.") == 0);
 }
 
 // Test case 5: Valid input values
-assert_test(decodeCTIM("CFFFFFFFFFFFFFFF") == array("ledger_seq" => 0xFFFFFFF, "txn_index" => 0xFFFF, "network_id" => 0xFFFF));
-assert_test(decodeCTIM("C000000000000000") == array("ledger_seq" => 0, "txn_index" => 0, "network_id" => 0));
-assert_test(decodeCTIM("C000000100020003") == array("ledger_seq" =>1, "txn_index" => 2, "network_id" => 3));
-assert_test(decodeCTIM("C0CA2AA7326FC045") == array("ledger_seq" =>13249191, "txn_index" => 12911, "network_id" => 49221));
+assert_test(decodeCTID("CFFFFFFFFFFFFFFF") == array("ledger_seq" => 0xFFFFFFF, "txn_index" => 0xFFFF, "network_id" => 0xFFFF));
+assert_test(decodeCTID("C000000000000000") == array("ledger_seq" => 0, "txn_index" => 0, "network_id" => 0));
+assert_test(decodeCTID("C000000100020003") == array("ledger_seq" =>1, "txn_index" => 2, "network_id" => 3));
+assert_test(decodeCTID("C0CA2AA7326FC045") == array("ledger_seq" =>13249191, "txn_index" => 12911, "network_id" => 49221));
 
 
 print("Done!\n");
